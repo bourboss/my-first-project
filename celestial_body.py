@@ -32,6 +32,5 @@ class Body:
         force = self.calculate_force(other)
         force_x = force * math.cos(theta)
         force_y = force * math.sin(theta)
-
         return force_x, force_y
     
