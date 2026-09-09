@@ -2,7 +2,8 @@ import math
 G = 6.674e-11
 
 class Body:
-    def __init__(self, mass, v_x, v_y, p_x, p_y):  #creating the class of a planet and its attributes within it
+    def __init__(self, name, mass, v_x, v_y, p_x, p_y):  #creating the class of a planet and its attributes within it
+        self.name = name
         self.mass = mass
         self.v_x = v_x
         self.v_y = v_y

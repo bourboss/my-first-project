@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <title>Gravitational Orbit Simulator</title> <!--displays the title on the tab at the top of your screen-->
+            <style>
+                .button {
+                border: none;
+                color: white;
+                padding: 16px 20px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                transition-duration: 0.4s;
+                cursor: pointer;
+                }
+
+                .button1 {
+                background-color: white;
+                color: black;
+                border: 2px solid #04AA6D;
+                }
+
+                .button1:hover {
+                background-color: #04AA6D;
+                color: white;
+                }
+            </style>
+    </head>
+    <body>
+        <h1>Orbit Simulator</h1> <!--first thing actually seen on the website-->
+        <div style="display:flex">
+            <div>
+                <canvas id="myCanvas" width="500" height="500" style="border:1px solid #000000; background-color: darkgray;"></canvas> <!--makes the square shape where the simulation will be displayed-->
+            </div>
+            <div style="margin-left: 100px">
+                <select name="Planets" id="Planets">
+                    <option value="Planet A">Planet A</option>
+                    <option value="Planet B">Planet B</option>
+                </select>
+                <br>
+                <button type="button">+ Add New</button>
+                <br><br><br><br><br>
+                <button class="button button1" onclick="applyPlanetChanges()">Apply</button>
+            </div>
+            <div style="margin-left: 10px">
+                <label for="x-position" style="display: inline-block; width: 80px">X-Position:</label>
+                <input type="text" id="x-position"> <br>
+                <label for="y-position" style="display: inline-block; width: 80px">Y-Position:</label>
+                <input type="text" id="y-position"> <br>
+                <br>
+                <br>
+                <label for="x-velocity" style="display: inline-block; width: 80px">X-Velocity:</label>
+                <input type="text" id="x-velocity"> <br>
+                <label for="y-velocity" style="display: inline-block; width: 80px">Y-Velocity:</label>
+                <input type="text" id="y-velocity"> <br>
+                <br>
+                <br>
+                <label for="mass" style="display: inline-block; width: 80px">Mass:</label>
+                <input type="text" id="mass"> <br>
+            </div>
+        </div>
+            <script>
+            const canvas = document.getElementById('myCanvas')
+            const ctx = canvas.getContext('2d')
+
+            function drawPlanet(bodies) {
+                const SCALE = 2e9;
+                const OFFSET_X = 250;
+                const OFFSET_Y = 250;
+                for (let body of bodies) {
+                    const pos_x = (body.x / SCALE) + OFFSET_X
+                    const pos_y = (body.y / SCALE) + OFFSET_Y
+                    ctx.beginPath();
+                    ctx.arc(pos_x, pos_y,3, 0 ,2*Math.PI)
+                    ctx.fillStyle = 'white';
+                    ctx.fill()
+                }
+            }
+
+            function animate() {
+                fetch("/sim")
+                    .then(response => response.json())
+                    .then(data => {
+                        ctx.clearRect(0,0,canvas.width,canvas.height);
+                        drawPlanet(data)
+                        animate()
+                    });
+            }
+            const planets = {
+                "Planet A":{mass:2e30, pos_x:0, pos_y:0, v_x:0, v_y:0},
+                "Planet B":{mass:6e24, pos_x:1.5e11, pos_y:0, v_x:0, v_y:29783}
+            }
+            function updateInputBoxes() {
+                const selected = document.getElementById("Planets").value
+                document.getElementById("x-position").value = planets[selected].pos_x;
+                document.getElementById("y-position").value = planets[selected].pos_y;
+                document.getElementById("x-velocity").value = planets[selected].v_x;
+                document.getElementById("y-velocity").value = planets[selected].v_y;
+                document.getElementById("mass").value = planets[selected].mass;
+            }
+
+            function applyPlanetChanges() {
+                const selected = document.getElementById("Planets").value;
+                const updatedData = {
+                    mass: parseFloat(document.getElementById("mass").value),
+                    pos_x: parseFloat(document.getElementById("x-position").value),
+                    pos_y: parseFloat(document.getElementById("y-position").value),
+                    v_x: parseFloat(document.getElementById("x-velocity").value),
+                    v_y: parseFloat(document.getElementById("y-velocity").value),
+                };
+                fetch('/update_planet',{
+                    method: 'POST',
+                    headers: {'Content-Type' : 'application/json'},
+                    body: JSON.stringify({
+                        planet_name: selected,
+                        data: updatedData
+                    })
+                })
+            }
+
+            document.getElementById("Planets").addEventListener("change", updateInputBoxes);
+            updateInputBoxes()
+            animate()
+            </script>
+    </body>
+</html>

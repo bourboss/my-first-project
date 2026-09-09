@@ -1,16 +1,16 @@
-from flask import Flask, render_template, jsonify #importing flask and rendertemplate so that flask can display a web page
+from flask import Flask, render_template, jsonify, request
 from simulator import Simulator
 from celestial_body import Body
 
 app = Flask(__name__)
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('website.html')
 
-earth = Body(6e24,0,29783,1.5e11,0)
-sun = Body(2e30,0,0,0,0)
+earth = Body("Planet B",6e24,0,29783,1.6e11,0)
+sun = Body("Planet A", 2e30,0,0,0,0)
 
-sim = Simulator([earth, sun],3600) #this creates an object inside the Simulator class with the bodies in them and with a time step
+sim = Simulator([earth, sun],50000) #this creates an object inside the Simulator class with the bodies in them and with a time step
 
 @app.route('/sim')
 def simulate():
@@ -21,6 +21,17 @@ def simulate():
         positions.append(pos_holder)
     return jsonify(positions)
 
+@app.route('/update_planet', methods=['POST'])
+def update_planet():
+    data = request.get_json()
+    for body in sim.bodies:
+        if body.name == data["planet_name"]:
+            body.mass = data["data"]["mass"]
+            body.v_x = data["data"]["v_x"]
+            body.v_y = data["data"]["v_y"]
+            body.p_x = data["data"]["pos_x"]
+            body.p_y = data["data"]["pos_y"]
+    return jsonify({"status": "ok"})
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug = True)
