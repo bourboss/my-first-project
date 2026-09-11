@@ -42,6 +42,8 @@
                 <button type="button">+ Add New</button>
                 <br><br><br><br><br>
                 <button class="button button1" onclick="applyPlanetChanges()">Apply</button>
+                <br>
+                <button class="button button1" onclick="resetPlanets()">Reset</button>
             </div>
             <div style="margin-left: 10px">
                 <label for="x-position" style="display: inline-block; width: 80px">X-Position:</label>
@@ -116,6 +118,12 @@
                         planet_name: selected,
                         data: updatedData
                     })
+                })
+            }
+
+            function resetPlanets() {
+                fetch('/reset' , {
+                    method: 'POST'
                 })
             }
 
