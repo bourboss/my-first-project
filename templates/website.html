@@ -14,13 +14,11 @@
                 transition-duration: 0.4s;
                 cursor: pointer;
                 }
-
                 .button1 {
                 background-color: white;
                 color: black;
                 border: 2px solid #04AA6D;
                 }
-
                 .button1:hover {
                 background-color: #04AA6D;
                 color: white;
@@ -32,6 +30,15 @@
         <div style="display:flex">
             <div>
                 <canvas id="myCanvas" width="500" height="500" style="border:1px solid #000000; background-color: darkgray;"></canvas> <!--makes the square shape where the simulation will be displayed-->
+                <br><br>
+                <button type="button" onclick="stopstart()">Pause / Resume</button>
+                <label style="margin-left: 175px; vertical-align: middle">Time Step:</label>
+                <input type="range" min="0" max="60" value="30" id="timestep_slider"><br>
+                <span id="dt_display" style="margin-left: 380px; font-size: 12px">31623 seconds per step.</span>
+                <br>
+                <span id="dt_display_hours" style="margin-left: 386px; font-size: 12px">8.8 hours per step.</span>
+                
+
             </div>
             <div style="margin-left: 100px">
                 <select name="Planets" id="Planets">
@@ -63,9 +70,24 @@
             </div>
         </div>
             <script>
+            let allowAnimate = true;
             const canvas = document.getElementById('myCanvas')
             const ctx = canvas.getContext('2d')
-
+            
+            document.getElementById("timestep_slider").addEventListener("input", function(){
+                const slider_value = document.getElementById("timestep_slider").value
+                const dt = Math.round(Math.pow(10, slider_value / 20 + 3))
+                document.getElementById("dt_display").innerText = dt + " seconds per step."
+                dt_hours = Math.round(dt / 60)
+                document.getElementById("dt_display_hours").innerText = dt_hours + " hours per step."
+                fetch('/update_dt' , {
+                    method: 'POST',
+                    headers: {'Content-Type' : 'application/json'},
+                    body: JSON.stringify({
+                        dt: dt,
+                })
+            })
+            })
             function drawPlanet(bodies) {
                 const SCALE = 2e9;
                 const OFFSET_X = 250;
@@ -86,7 +108,9 @@
                     .then(data => {
                         ctx.clearRect(0,0,canvas.width,canvas.height);
                         drawPlanet(data)
-                        animate()
+                        if (allowAnimate) {
+                            animate()
+                        }  
                     });
             }
             const planets = {
@@ -125,8 +149,15 @@
                 fetch('/reset' , {
                     method: 'POST'
                 })
+                updateInputBoxes()
             }
-
+            
+            function stopstart(){
+                allowAnimate = !allowAnimate
+                if (allowAnimate) {
+                    animate()
+                }
+            }
             document.getElementById("Planets").addEventListener("change", updateInputBoxes);
             updateInputBoxes()
             animate()

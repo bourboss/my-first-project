@@ -33,5 +33,26 @@ def update_planet():
             body.p_y = data["data"]["pos_y"]
     return jsonify({"status": "ok"})
 
+@app.route('/reset',methods=['POST'])
+def reset():
+    earth.mass = 6e24
+    earth.v_x = 0
+    earth.v_y = 29783
+    earth.p_x = 1.6e11
+    earth.p_y = 0
+    sun.mass = 2e30
+    sun.v_x = 0
+    sun.v_y = 0
+    sun.p_x = 0
+    sun.p_y = 0
+
+    return jsonify({"status":"ok"})
+
+@app.route('/update_dt',methods=['POST'])
+def update_dt():
+    data = request.get_json()
+    sim.dt = data["dt"]
+    return jsonify({"status":"ok"})
+
 if __name__ == '__main__':
     app.run(debug = True)
