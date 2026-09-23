@@ -24,13 +24,19 @@ def simulate():
 @app.route('/update_planet', methods=['POST'])
 def update_planet():
     data = request.get_json()
+    found = False
     for body in sim.bodies:
         if body.name == data["planet_name"]:
+            found = True
+            body.name = data["data"]["name"]
             body.mass = data["data"]["mass"]
             body.v_x = data["data"]["v_x"]
             body.v_y = data["data"]["v_y"]
             body.p_x = data["data"]["pos_x"]
             body.p_y = data["data"]["pos_y"]
+    if found == False:
+        new_planet = Body(data["data"]["name"], data["data"]["mass"], data["data"]["v_x"], data["data"]["v_y"], data["data"]["pos_x"], data["data"]["pos_y"])
+        sim.bodies.append(new_planet)
     return jsonify({"status": "ok"})
 
 @app.route('/reset',methods=['POST'])

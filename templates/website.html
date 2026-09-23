@@ -42,17 +42,19 @@
             </div>
             <div style="margin-left: 100px">
                 <select name="Planets" id="Planets">
-                    <option value="Planet A">Planet A</option>
-                    <option value="Planet B">Planet B</option>
+                    <option value="Planet A">Sun</option>
+                    <option value="Planet B">Earth</option>
                 </select>
                 <br>
-                <button type="button">+ Add New</button>
+                <button type="button" onclick="addNewPlanet()">+ Add New</button>
                 <br><br><br><br><br>
                 <button class="button button1" onclick="applyPlanetChanges()">Apply</button>
                 <br>
                 <button class="button button1" onclick="resetPlanets()">Reset</button>
             </div>
             <div style="margin-left: 10px">
+                <label for="planet_name" style="display: inline-block; width: 80px">Name:</label>
+                <input type="text" id="planet_name"> <br>
                 <label for="x-position" style="display: inline-block; width: 80px">X-Position:</label>
                 <input type="text" id="x-position"> <br>
                 <label for="y-position" style="display: inline-block; width: 80px">Y-Position:</label>
@@ -70,6 +72,7 @@
             </div>
         </div>
             <script>
+            let planetCount = 1;
             let allowAnimate = true;
             const canvas = document.getElementById('myCanvas')
             const ctx = canvas.getContext('2d')
@@ -114,11 +117,12 @@
                     });
             }
             const planets = {
-                "Planet A":{mass:2e30, pos_x:0, pos_y:0, v_x:0, v_y:0},
-                "Planet B":{mass:6e24, pos_x:1.5e11, pos_y:0, v_x:0, v_y:29783}
+                "Planet A":{name: "Sun", mass:2e30, pos_x:0, pos_y:0, v_x:0, v_y:0},
+                "Planet B":{name: "Earth", mass:6e24, pos_x:1.5e11, pos_y:0, v_x:0, v_y:29783}
             }
             function updateInputBoxes() {
                 const selected = document.getElementById("Planets").value
+                document.getElementById("planet_name").value = planets[selected].name;
                 document.getElementById("x-position").value = planets[selected].pos_x;
                 document.getElementById("y-position").value = planets[selected].pos_y;
                 document.getElementById("x-velocity").value = planets[selected].v_x;
@@ -129,6 +133,7 @@
             function applyPlanetChanges() {
                 const selected = document.getElementById("Planets").value;
                 const updatedData = {
+                    name: document.getElementById("planet_name").value,
                     mass: parseFloat(document.getElementById("mass").value),
                     pos_x: parseFloat(document.getElementById("x-position").value),
                     pos_y: parseFloat(document.getElementById("y-position").value),
@@ -143,6 +148,19 @@
                         data: updatedData
                     })
                 })
+                const newName = document.getElementById("planet_name").value
+                const dropdown = document.getElementById("Planets")
+                dropdown.options[dropdown.selectedIndex].text = newName
+                dropdown.options[dropdown.selectedIndex].value = newName
+                planets[newName] = {
+                    name: newName,
+                    mass: parseFloat(document.getElementById("mass").value),
+                    pos_x: parseFloat(document.getElementById("x-position").value),
+                    pos_y: parseFloat(document.getElementById("y-position").value),
+                    v_x: parseFloat(document.getElementById("x-velocity").value),
+                    v_y: parseFloat(document.getElementById("y-velocity").value)
+                }
+                delete planets[selected]
             }
 
             function resetPlanets() {
@@ -157,6 +175,17 @@
                 if (allowAnimate) {
                     animate()
                 }
+            }
+            function addNewPlanet(){
+                const newName = 'New Planet ' + planetCount
+                planetCount++
+                const new_option = document.createElement('option');
+                new_option.value = newName;
+                new_option.text = newName;
+                document.getElementById("Planets").appendChild(new_option);
+                planets[newName] = {name: newName, mass: 0, pos_x: 0, pos_y: 0, v_x: 0, v_y: 0}
+                document.getElementById("Planets").value = newName
+                updateInputBoxes()
             }
             document.getElementById("Planets").addEventListener("change", updateInputBoxes);
             updateInputBoxes()
