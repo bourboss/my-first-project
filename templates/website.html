@@ -42,8 +42,8 @@
             </div>
             <div style="margin-left: 100px">
                 <select name="Planets" id="Planets">
-                    <option value="Planet A">Sun</option>
-                    <option value="Planet B">Earth</option>
+                    <option value="Sun">Sun</option>
+                    <option value="Earth">Earth</option>
                 </select>
                 <br>
                 <button type="button" onclick="addNewPlanet()">+ Add New</button>
@@ -117,8 +117,8 @@
                     });
             }
             const planets = {
-                "Planet A":{name: "Sun", mass:2e30, pos_x:0, pos_y:0, v_x:0, v_y:0},
-                "Planet B":{name: "Earth", mass:6e24, pos_x:1.5e11, pos_y:0, v_x:0, v_y:29783}
+                "Sun":{name: "Sun", mass:2e30, pos_x:0, pos_y:0, v_x:0, v_y:0},
+                "Earth":{name: "Earth", mass:6e24, pos_x:1.5e11, pos_y:0, v_x:0, v_y:29783}
             }
             function updateInputBoxes() {
                 const selected = document.getElementById("Planets").value
