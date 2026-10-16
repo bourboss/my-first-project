@@ -2,13 +2,14 @@ import math
 G = 6.674e-11
 
 class Body:
-    def __init__(self, name, mass, v_x, v_y, p_x, p_y):  #creating the class of a planet and its attributes within it
+    def __init__(self, name, mass, v_x, v_y, p_x, p_y,id):  #creating the class of a planet and its attributes within it
         self.name = name
         self.mass = mass
         self.v_x = v_x
         self.v_y = v_y
         self.p_x = p_x
         self.p_y = p_y
+        self.id = id
 
     def calculate_force(self, other):
         distance = (((self.p_x - other.p_x)**2) + ((self.p_y - other.p_y)**2)) ** 0.5 #calculating the distance through pythagoras

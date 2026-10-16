@@ -72,6 +72,7 @@
             </div>
         </div>
             <script>
+            let next_id = 3;
             let planetCount = 1;
             let allowAnimate = true;
             const canvas = document.getElementById('myCanvas')
@@ -117,8 +118,8 @@
                     });
             }
             const planets = {
-                "Sun":{name: "Sun", mass:2e30, pos_x:0, pos_y:0, v_x:0, v_y:0},
-                "Earth":{name: "Earth", mass:6e24, pos_x:1.5e11, pos_y:0, v_x:0, v_y:29783}
+                "Sun":{id: 2, name: "Sun", mass:2e30, pos_x:0, pos_y:0, v_x:0, v_y:0},
+                "Earth":{id: 1, name: "Earth", mass:6e24, pos_x:1.5e11, pos_y:0, v_x:0, v_y:29783}
             }
             function updateInputBoxes() {
                 const selected = document.getElementById("Planets").value
@@ -144,7 +145,7 @@
                     method: 'POST',
                     headers: {'Content-Type' : 'application/json'},
                     body: JSON.stringify({
-                        planet_name: selected,
+                        planet_id : planets[selected].id,
                         data: updatedData
                     })
                 })
@@ -153,6 +154,7 @@
                 dropdown.options[dropdown.selectedIndex].text = newName
                 dropdown.options[dropdown.selectedIndex].value = newName
                 planets[newName] = {
+                    id: planets[selected].id,
                     name: newName,
                     mass: parseFloat(document.getElementById("mass").value),
                     pos_x: parseFloat(document.getElementById("x-position").value),
@@ -183,7 +185,8 @@
                 new_option.value = newName;
                 new_option.text = newName;
                 document.getElementById("Planets").appendChild(new_option);
-                planets[newName] = {name: newName, mass: 0, pos_x: 0, pos_y: 0, v_x: 0, v_y: 0}
+                planets[newName] = {id: next_id ,name: newName, mass: 0, pos_x: 0, pos_y: 0, v_x: 0, v_y: 0}
+                next_id ++
                 document.getElementById("Planets").value = newName
                 updateInputBoxes()
             }
