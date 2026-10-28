@@ -82,7 +82,7 @@
                 const slider_value = document.getElementById("timestep_slider").value
                 const dt = Math.round(Math.pow(10, slider_value / 20 + 3))
                 document.getElementById("dt_display").innerText = dt + " seconds per step."
-                dt_hours = Math.round(dt / 60)
+                dt_hours = Math.round(dt / 3600)
                 document.getElementById("dt_display_hours").innerText = dt_hours + " hours per step."
                 fetch('/update_dt' , {
                     method: 'POST',

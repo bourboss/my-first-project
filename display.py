@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request
 from simulator import Simulator
 from celestial_body import Body
 from database import db, User, Simulation, Planets
+from werkzeug.security import generate_password_hash
 
 app = Flask(__name__)
 next_id = 3
@@ -57,7 +58,7 @@ def reset():
     earth.mass = 6e24
     earth.v_x = 0
     earth.v_y = 29783
-    earth.p_x = 1.6e11
+    earth.p_x = 1.5e11
     earth.p_y = 0
     sun.mass = 2e30
     sun.v_x = 0
@@ -72,6 +73,16 @@ def update_dt():
     data = request.get_json()
     sim.dt = data["dt"]
     return jsonify({"status":"ok"})
+
+@app.route('/register', methods=['GET','POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        hashed_password = generate_password_hash(password)
+        user = User.query.filter_by(username=username).first()
+        if user:
+            password_check = User.query.filter_by(password=hashed_password).first()
 
 if __name__ == '__main__':
     app.run(debug = True)
