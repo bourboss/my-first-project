@@ -1,0 +1,198 @@
+<html>
+    <head>
+        <title>Gravitational Orbit Simulator</title> <!--displays the title on the tab at the top of your screen-->
+            <style>
+                .button {
+                border: none;
+                color: white;
+                padding: 16px 20px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                transition-duration: 0.4s;
+                cursor: pointer;
+                }
+                .button1 {
+                background-color: white;
+                color: black;
+                border: 2px solid #04AA6D;
+                }
+                .button1:hover {
+                background-color: #04AA6D;
+                color: white;
+                }
+            </style>
+    </head>
+    <body>
+        <h1>Orbit Simulator</h1> <!--first thing actually seen on the website-->
+        <div style="display:flex">
+            <div>
+                <canvas id="myCanvas" width="500" height="500" style="border:1px solid #000000; background-color: darkgray;"></canvas> <!--makes the square shape where the simulation will be displayed-->
+                <br><br>
+                <button type="button" onclick="stopstart()">Pause / Resume</button>
+                <label style="margin-left: 175px; vertical-align: middle">Time Step:</label>
+                <input type="range" min="0" max="60" value="30" id="timestep_slider"><br>
+                <span id="dt_display" style="margin-left: 380px; font-size: 12px">31623 seconds per step.</span>
+                <br>
+                <span id="dt_display_hours" style="margin-left: 386px; font-size: 12px">8.8 hours per step.</span>
+                
+
+            </div>
+            <div style="margin-left: 100px">
+                <select name="Planets" id="Planets">
+                    <option value="Sun">Sun</option>
+                    <option value="Earth">Earth</option>
+                </select>
+                <br>
+                <button type="button" onclick="addNewPlanet()">+ Add New</button>
+                <br><br><br><br><br>
+                <button class="button button1" onclick="applyPlanetChanges()">Apply</button>
+                <br>
+                <button class="button button1" onclick="resetPlanets()">Reset</button>
+            </div>
+            <div style="margin-left: 10px">
+                <label for="planet_name" style="display: inline-block; width: 80px">Name:</label>
+                <input type="text" id="planet_name"> <br>
+                <label for="x-position" style="display: inline-block; width: 80px">X-Position:</label>
+                <input type="text" id="x-position"> <br>
+                <label for="y-position" style="display: inline-block; width: 80px">Y-Position:</label>
+                <input type="text" id="y-position"> <br>
+                <br>
+                <br>
+                <label for="x-velocity" style="display: inline-block; width: 80px">X-Velocity:</label>
+                <input type="text" id="x-velocity"> <br>
+                <label for="y-velocity" style="display: inline-block; width: 80px">Y-Velocity:</label>
+                <input type="text" id="y-velocity"> <br>
+                <br>
+                <br>
+                <label for="mass" style="display: inline-block; width: 80px">Mass:</label>
+                <input type="text" id="mass"> <br>
+            </div>
+        </div>
+            <script>
+            let next_id = 3;
+            let planetCount = 1;
+            let allowAnimate = true;
+            const canvas = document.getElementById('myCanvas')
+            const ctx = canvas.getContext('2d')
+            
+            document.getElementById("timestep_slider").addEventListener("input", function(){
+                const slider_value = document.getElementById("timestep_slider").value
+                const dt = Math.round(Math.pow(10, slider_value / 20 + 3))
+                document.getElementById("dt_display").innerText = dt + " seconds per step."
+                dt_hours = Math.round(dt / 3600)
+                document.getElementById("dt_display_hours").innerText = dt_hours + " hours per step."
+                fetch('/update_dt' , {
+                    method: 'POST',
+                    headers: {'Content-Type' : 'application/json'},
+                    body: JSON.stringify({
+                        dt: dt,
+                })
+            })
+            })
+            function drawPlanet(bodies) {
+                const SCALE = 2e9;
+                const OFFSET_X = 250;
+                const OFFSET_Y = 250;
+                for (let body of bodies) {
+                    const pos_x = (body.x / SCALE) + OFFSET_X
+                    const pos_y = (body.y / SCALE) + OFFSET_Y
+                    ctx.beginPath();
+                    ctx.arc(pos_x, pos_y,3, 0 ,2*Math.PI)
+                    ctx.fillStyle = 'white';
+                    ctx.fill()
+                }
+            }
+
+            function animate() {
+                fetch("/sim")
+                    .then(response => response.json())
+                    .then(data => {
+                        ctx.clearRect(0,0,canvas.width,canvas.height);
+                        drawPlanet(data)
+                        if (allowAnimate) {
+                            animate()
+                        }  
+                    });
+            }
+            const planets = {
+                "Sun":{id: 2, name: "Sun", mass:2e30, pos_x:0, pos_y:0, v_x:0, v_y:0},
+                "Earth":{id: 1, name: "Earth", mass:6e24, pos_x:1.5e11, pos_y:0, v_x:0, v_y:29783}
+            }
+            function updateInputBoxes() {
+                const selected = document.getElementById("Planets").value
+                document.getElementById("planet_name").value = planets[selected].name;
+                document.getElementById("x-position").value = planets[selected].pos_x;
+                document.getElementById("y-position").value = planets[selected].pos_y;
+                document.getElementById("x-velocity").value = planets[selected].v_x;
+                document.getElementById("y-velocity").value = planets[selected].v_y;
+                document.getElementById("mass").value = planets[selected].mass;
+            }
+
+            function applyPlanetChanges() {
+                const selected = document.getElementById("Planets").value;
+                const updatedData = {
+                    name: document.getElementById("planet_name").value,
+                    mass: parseFloat(document.getElementById("mass").value),
+                    pos_x: parseFloat(document.getElementById("x-position").value),
+                    pos_y: parseFloat(document.getElementById("y-position").value),
+                    v_x: parseFloat(document.getElementById("x-velocity").value),
+                    v_y: parseFloat(document.getElementById("y-velocity").value),
+                };
+                fetch('/update_planet',{
+                    method: 'POST',
+                    headers: {'Content-Type' : 'application/json'},
+                    body: JSON.stringify({
+                        planet_id : planets[selected].id,
+                        data: updatedData
+                    })
+                })
+                const newName = document.getElementById("planet_name").value
+                const dropdown = document.getElementById("Planets")
+                dropdown.options[dropdown.selectedIndex].text = newName
+                dropdown.options[dropdown.selectedIndex].value = newName
+                planets[newName] = {
+                    id: planets[selected].id,
+                    name: newName,
+                    mass: parseFloat(document.getElementById("mass").value),
+                    pos_x: parseFloat(document.getElementById("x-position").value),
+                    pos_y: parseFloat(document.getElementById("y-position").value),
+                    v_x: parseFloat(document.getElementById("x-velocity").value),
+                    v_y: parseFloat(document.getElementById("y-velocity").value)
+                }
+                delete planets[selected]
+            }
+
+            function resetPlanets() {
+                fetch('/reset' , {
+                    method: 'POST'
+                })
+                updateInputBoxes()
+            }
+            
+            function stopstart(){
+                allowAnimate = !allowAnimate
+                if (allowAnimate) {
+                    animate()
+                }
+            }
+            function addNewPlanet(){
+                const newName = 'New Planet ' + planetCount
+                planetCount++
+                const new_option = document.createElement('option');
+                new_option.value = newName;
+                new_option.text = newName;
+                document.getElementById("Planets").appendChild(new_option);
+                planets[newName] = {id: next_id ,name: newName, mass: 0, pos_x: 0, pos_y: 0, v_x: 0, v_y: 0}
+                next_id ++
+                document.getElementById("Planets").value = newName
+                updateInputBoxes()
+            }
+            document.getElementById("Planets").addEventListener("change", updateInputBoxes);
+            updateInputBoxes()
+            animate()
+            </script>
+    </body>
+</html>
