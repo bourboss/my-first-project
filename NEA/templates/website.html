@@ -96,12 +96,18 @@
                 const SCALE = 2e9;
                 const OFFSET_X = 250;
                 const OFFSET_Y = 250;
+                const selected = document.getElementById("Planets").value;
+                const selectedId = planets[selected] ? planets[selected].id : null;
                 for (let body of bodies) {
                     const pos_x = (body.x / SCALE) + OFFSET_X
                     const pos_y = (body.y / SCALE) + OFFSET_Y
                     ctx.beginPath();
                     ctx.arc(pos_x, pos_y,3, 0 ,2*Math.PI)
-                    ctx.fillStyle = 'white';
+                    if (body.id == selectedId) {
+                        ctx.fillStyle = 'green';
+                    } else {
+                        ctx.fillStyle = 'white'
+                    }
                     ctx.fill()
                 }
             }
@@ -162,7 +168,10 @@
                     v_x: parseFloat(document.getElementById("x-velocity").value),
                     v_y: parseFloat(document.getElementById("y-velocity").value)
                 }
-                delete planets[selected]
+                if (newName !== selected) {
+                    delete planets[selected]
+                }
+                
             }
 
             function resetPlanets() {
