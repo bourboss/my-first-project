@@ -11,6 +11,8 @@ class Simulation(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
     name = db.Column(db.String(100), nullable=False)
 
+    planets = db.relationship('Planets', backref ='simulation', lazy=True)
+
 class Planets(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     simulation_id = db.Column(db.Integer, db.ForeignKey('simulation.id'))

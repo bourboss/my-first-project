@@ -3,6 +3,7 @@ from simulator import Simulator
 from celestial_body import Body
 from database import db, User, Simulation, Planets
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 next_id = 3
@@ -113,6 +114,29 @@ def account():
 def logout():
     session.pop('user_id', None)
     return redirect(url_for('account'))
+
+@app.route('/save', methods=['POST'])
+def save():
+    planet_dictionary = request.get_json() 
+    new_simulation = Simulation(
+        user_id = session['user_id'],
+        name = planet_dictionary.get('name'),
+    )
+    db.session.add(new_simulation)
+    db.session.commit()
+    for planet in planet_dictionary['planets'].values():
+        new_record = Planets(
+            simulation_id = new_simulation.id,
+            name = planet['name'],
+            mass = planet['mass'],
+            pos_x = planet['pos_x'],
+            pos_y = planet['pos_y'],
+            v_x = planet['v_x'],
+            v_y = planet['v_y']
+        )
+        db.session.add(new_record)
+    db.session.commit()
+    return jsonify({"status" : "success"})
 
 if __name__ == '__main__':
     app.run(debug = True)

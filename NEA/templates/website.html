@@ -40,6 +40,7 @@
                 
 
             </div>
+            <button type="button" onclick="saveSim()">Save Current Sim</button>
             <div style="margin-left: 100px">
                 <select name="Planets" id="Planets">
                     <option value="Sun">Sun</option>
@@ -198,6 +199,30 @@
                 next_id ++
                 document.getElementById("Planets").value = newName
                 updateInputBoxes()
+            }
+            function saveSim() {
+                const sim_name = prompt("Enter a name for your simulation:","MySim1");
+                if (!sim_name) return;
+                fetch('/save',{
+                    method: 'POST',
+                    headers: {
+                        'Content-Type' : 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: sim_name,
+                        planets: planets
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success"){
+                        alert("Simulation was saved successfully.")
+                    }
+                })
+                .catch((error) => {
+                    alert("Error occured. Please check your connection and re-try.")
+                }) 
+
             }
             document.getElementById("Planets").addEventListener("change", updateInputBoxes);
             updateInputBoxes()
