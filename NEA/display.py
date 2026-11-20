@@ -138,5 +138,16 @@ def save():
     db.session.commit()
     return jsonify({"status" : "success"})
 
+@app.route('/display_saves', methods=["POST"])
+def display_saves():
+    saved_sims = db.session.query(Simulation).filter(Simulation.user_id == session['user_id']).all()
+    sim_list = []
+    for sim in saved_sims:
+        sim_list.append({
+            "id": sim.id,
+            "name": sim.name
+        })
+    return jsonify(sim_list)
+
 if __name__ == '__main__':
     app.run(debug = True)

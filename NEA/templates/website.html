@@ -40,7 +40,6 @@
                 
 
             </div>
-            <button type="button" onclick="saveSim()">Save Current Sim</button>
             <div style="margin-left: 100px">
                 <select name="Planets" id="Planets">
                     <option value="Sun">Sun</option>
@@ -72,6 +71,9 @@
                 <input type="text" id="mass"> <br>
             </div>
         </div>
+        <div><button type="button" onclick="saveSim()">Save Current Sim</button>
+        <button type="button" onclick="open_button()" >Open a Sim</button></div>
+        <select name="saved_sims" id="saved_sims" style='display: none;'></select>
             <script>
             let next_id = 3;
             let planetCount = 1;
@@ -224,6 +226,29 @@
                 }) 
 
             }
+            function display_saves() {
+                fetch('/display_saves',{
+                    method: 'POST',
+                    headers: {
+                        'Content-Type' : 'application/json' 
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+
+                })
+            }
+
+            function open_button() {
+                display_saves()
+                create_dropdown()
+                return
+            }
+            
+            function create_dropdown() {
+
+            }
+
             document.getElementById("Planets").addEventListener("change", updateInputBoxes);
             updateInputBoxes()
             animate()
